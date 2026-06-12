@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator Karakter Diri</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f0f2f5; min-height: 100vh; display: flex; justify-content: center; }
+  .wrap { width: 100%; max-width: 460px; background: #fff; min-height: 100vh; }
+
+  .header { text-align: center; padding: 28px 16px 22px; background: #1B2A4A; border-radius: 0 0 20px 20px; }
+  .header-title { color: #fff; font-size: 21px; font-weight: 700; }
+
+  .form-box { padding: 16px 20px 28px; }
+  .card { background: #fff; border-radius: 14px; padding: 24px; border: 1px solid #e8e8e8; }
+  .card-title { font-size: 14px; font-weight: 700; margin-bottom: 18px; color: #1B2A4A; }
+
+  .date-row { display: flex; gap: 10px; }
+  .date-field { flex: 1; }
+  .date-field.wide { flex: 1.6; }
+  .field-label { font-size: 11px; color: #888; margin-bottom: 4px; font-weight: 600; }
+  .date-input {
+    width: 100%; padding: 13px 8px; border: 1.5px solid #ddd; border-radius: 10px;
+    font-size: 18px; text-align: center; font-weight: 700; outline: none;
+    background: #fafafa; color: #1B2A4A;
+  }
+  .date-input:focus { border-color: #1B2A4A; background: #fff; }
+
+  .night-toggle {
+    margin-top: 16px; padding: 12px 14px; border-radius: 10px; cursor: pointer;
+    background: #fafafa; border: 1.5px solid #ddd;
+    display: flex; align-items: center; gap: 10px; transition: all 0.2s;
+  }
+  .night-toggle.active { background: #1B2A4A; border-color: #1B2A4A; }
+  .night-toggle-text { flex: 1; }
+  .night-toggle-label { font-size: 13px; font-weight: 600; color: #1B2A4A; }
+  .night-toggle.active .night-toggle-label { color: #fff; }
+  .night-toggle-sub { font-size: 11px; color: #aaa; margin-top: 1px; }
+  .night-toggle.active .night-toggle-sub { color: #ffffff77; }
+
+  .checkbox-box {
+    width: 20px; height: 20px; border-radius: 5px; border: 2px solid #ccc;
+    background: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: #fff; font-weight: 700; flex-shrink: 0; transition: all 0.2s;
+  }
+  .checkbox-box.checked { background: #C9A84C; border-color: #C9A84C; }
+
+  .btn {
+    width: 100%; margin-top: 20px; padding: 14px; border: none; border-radius: 12px;
+    background: #1B2A4A; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer;
+  }
+  .btn:disabled { background: #e0e0e0; color: #999; cursor: default; }
+
+  .result-box { padding: 12px 18px 28px; }
+
+  .night-notice {
+    margin-top: 10px; padding: 10px 14px; background: #f5f5f5; border-radius: 10px;
+    font-size: 12px; color: #666; text-align: center; border: 1px solid #e0e0e0;
+  }
+
+  /* Group boxes */
+  .group-box {
+    margin-top: 20px; border-radius: 14px; overflow: hidden;
+    border: 1.5px solid #1B2A4A;
+  }
+  .group-box.jk { border-color: #bbb; }
+
+  .group-header {
+    padding: 12px 16px; background: #1B2A4A;
+    font-size: 12px; font-weight: 700; color: #fff;
+    letter-spacing: 1.5px; text-transform: uppercase;
+  }
+  .group-header.jk { background: #f0f0f0; color: #555; }
+
+  .group-body { padding: 12px 12px 4px; background: #fff; }
+  .group-body.jk { background: #fafafa; }
+
+  /* Sub-section label inside group */
+  .sub-label {
+    font-size: 10px; font-weight: 700; color: #C9A84C;
+    letter-spacing: 1px; text-transform: uppercase;
+    padding: 8px 4px 4px;
+  }
+  .sub-label:first-child { padding-top: 0; }
+
+  .item {
+    display: flex; align-items: center; gap: 14px; padding: 12px 14px;
+    background: #fff; border-radius: 10px; margin-bottom: 8px; border: 1px solid #e8e8e8;
+  }
+  .item.muted { background: #fafafa; border: 1px solid #e0e0e0; }
+
+  .badge {
+    width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 15px;
+  }
+  .badge.solid { background: #1B2A4A; color: #fff; }
+  .badge.keajaiban { background: #e8e8e8; color: #555; border: 1.5px solid #ccc; width: 30px; height: 30px; font-size: 13px; }
+
+  .item-name { font-size: 14px; font-weight: 700; color: #1B2A4A; }
+  .item.muted .item-name { color: #555; font-weight: 600; }
+  .item-sub { font-size: 12px; color: #888; margin-top: 2px; }
+
+  .reset-btn {
+    width: 100%; margin-top: 24px; padding: 14px; border-radius: 12px;
+    border: 1.5px solid #1B2A4A; background: transparent;
+    color: #1B2A4A; font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+
+  #form-section { display: block; }
+  #result-section { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="header-title">Kalkulator Karakter Diri</div>
+  </div>
+
+  <!-- FORM -->
+  <div id="form-section" class="form-box">
+    <div class="card">
+      <div class="card-title">Masukkan Tarikh Lahir</div>
+      <div class="date-row">
+        <div class="date-field">
+          <div class="field-label">Hari</div>
+          <input class="date-input" id="inp-day" type="number" placeholder="DD" min="1" max="31">
+        </div>
+        <div class="date-field">
+          <div class="field-label">Bulan</div>
+          <input class="date-input" id="inp-month" type="number" placeholder="MM" min="1" max="12">
+        </div>
+        <div class="date-field wide">
+          <div class="field-label">Tahun</div>
+          <input class="date-input" id="inp-year" type="number" placeholder="YYYY" min="1900" max="2030">
+        </div>
+      </div>
+
+      <div class="night-toggle" id="night-toggle" onclick="toggleNight()">
+        <div class="checkbox-box" id="night-cb"></div>
+        <div class="night-toggle-text">
+          <div class="night-toggle-label">Lahir antara 12 tengah malam hingga Subuh</div>
+          <div class="night-toggle-sub">Tarikh akan dikira sebagai hari sebelumnya</div>
+        </div>
+      </div>
+
+      <button class="btn" onclick="doCalc()">Analisa Karakter Saya</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result-section" class="result-box">
+    <div id="night-notice" class="night-notice" style="display:none"></div>
+
+    <!-- Kekuatan group box -->
+    <div class="group-box">
+      <div class="group-header">Kekuatan Diri</div>
+      <div class="group-body">
+        <div id="kekuatan-list"></div>
+        <div id="tambahan-section" style="display:none">
+          <div class="sub-label">Kekuatan Tambahan</div>
+          <div id="tambahan-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Jalan Keajaiban group box -->
+    <div id="jk-section" class="group-box jk" style="display:none">
+      <div class="group-header jk">Jalan Keajaiban</div>
+      <div class="group-body jk">
+        <div id="jk-list"></div>
+      </div>
+    </div>
+
+    <button class="reset-btn" onclick="doReset()">Kira Semula</button>
+  </div>
+</div>
+
+<script>
+const CHARS = {
+  1: { name: "Fikiran & Keazaman",       sub: "Pemimpin Berwawasan" },
+  2: { name: "Komunikasi & Interaktif",  sub: "Penghubung Sosial" },
+  3: { name: "Aktif & Spiritualiti",     sub: "Penggerak Cepat" },
+  4: { name: "Ilmu & Perancangan",       sub: "Perancang Bersistem" },
+  5: { name: "Keyakinan & Karisma",      sub: "Pemimpin Berstatus" },
+  6: { name: "Kewangan & Keluarga",      sub: "Penyumbang Rezeki" },
+  7: { name: "Sosial & Networking",      sub: "Kerjasama Sosial" },
+  8: { name: "Tanggungjawab & Komitmen", sub: "Pelaksana Amanah" },
+  9: { name: "Adab & Penampilan",        sub: "Insan Harmoni" },
+};
+
+let nightMode = false;
+
+function toggleNight() {
+  nightMode = !nightMode;
+  const toggle = document.getElementById('night-toggle');
+  const cb = document.getElementById('night-cb');
+  if (nightMode) {
+    toggle.classList.add('active');
+    cb.classList.add('checked');
+    cb.textContent = '\u2713';
+  } else {
+    toggle.classList.remove('active');
+    cb.classList.remove('checked');
+    cb.textContent = '';
+  }
+}
+
+function reduce(n) {
+  n = Math.abs(Math.floor(n));
+  if (n === 0) return 9;
+  while (n > 9) n = String(n).split('').reduce((a,b) => a + Number(b), 0);
+  return n;
+}
+
+function adjustDate(day, month, year) {
+  const d = new Date(year, month - 1, day);
+  d.setDate(d.getDate() - 1);
+  return { day: d.getDate(), month: d.getMonth() + 1, year: d.getFullYear() };
+}
+
+function calc(day, month, year, isNight) {
+  let adjDay = day, adjMonth = month, adjYear = year;
+  if (isNight) {
+    const adj = adjustDate(day, month, year);
+    adjDay = adj.day; adjMonth = adj.month; adjYear = adj.year;
+  }
+  const y1 = Math.floor(adjYear / 100), y2 = adjYear % 100;
+  const A = reduce(adjDay), B = reduce(adjMonth), C = reduce(y1), D = reduce(y2);
+  const E = reduce(A + B), F = reduce(C + D);
+  const G = reduce(E + F), H = reduce(B + C), I = reduce(G + H);
+  const oi   = reduce(A + E), oii  = reduce(B + E);
+  const oiii = reduce(C + F), oiv  = reduce(D + F);
+  const ov   = reduce(F + G), ovi  = reduce(E + G);
+
+  // 4 unique kekuatan from G, H, E, A
+  const primaryOrder = [G, H, E, A];
+  const kekuatan = [];
+  const seen = new Set();
+  for (const val of primaryOrder) {
+    if (!seen.has(val)) { kekuatan.push(val); seen.add(val); }
+  }
+
+  const allInner = new Set([G, H, E, A, F, I]);
+  const outerOnly = [oi, oii, oiii, oiv, ov, ovi];
+
+  // Tambahan: repeated 2x+ in outer i-vi, not in kekuatan
+  const freq = {};
+  outerOnly.forEach(v => { freq[v] = (freq[v] || 0) + 1; });
+  const kekuatanSet = new Set(kekuatan);
+  const tambahan = Object.entries(freq)
+    .filter(([k, c]) => c >= 2 && !kekuatanSet.has(Number(k)))
+    .map(([k]) => Number(k));
+
+  // Jalan keajaiban: not in inner AND not in outer
+  const allOuter = new Set(outerOnly);
+  const jalanKeajaiban = [];
+  for (let i = 1; i <= 9; i++) {
+    if (!allInner.has(i) && !allOuter.has(i)) jalanKeajaiban.push(i);
+  }
+
+  return { kekuatan, tambahan, jalanKeajaiban, adjDay, adjMonth, adjYear };
+}
+
+function makeBadge(num, variant) {
+  return '<div class="badge ' + variant + '">' + num + '</div>';
+}
+
+function makeItem(num, variant) {
+  return '<div class="item' + (variant === 'keajaiban' ? ' muted' : '') + '">' +
+    makeBadge(num, variant) +
+    '<div><div class="item-name">' + CHARS[num].name + '</div>' +
+    '<div class="item-sub">' + CHARS[num].sub + '</div></div></div>';
+}
+
+function doCalc() {
+  const day   = parseInt(document.getElementById('inp-day').value);
+  const month = parseInt(document.getElementById('inp-month').value);
+  const year  = parseInt(document.getElementById('inp-year').value);
+  if (!day || !month || !year || day<1||day>31||month<1||month>12||year<1900||year>2030) return;
+
+  const data = calc(day, month, year, nightMode);
+
+  // Night notice
+  const notice = document.getElementById('night-notice');
+  if (nightMode) {
+    notice.style.display = 'block';
+    notice.innerHTML = 'Tarikh dikira: <strong>' + data.adjDay + '/' + data.adjMonth + '/' + data.adjYear + '</strong> (tolak 1 hari)';
+  } else {
+    notice.style.display = 'none';
+  }
+
+  // Kekuatan
+  document.getElementById('kekuatan-list').innerHTML =
+    data.kekuatan.map(v => makeItem(v, 'solid')).join('');
+
+  // Tambahan
+  const tSection = document.getElementById('tambahan-section');
+  if (data.tambahan.length > 0) {
+    tSection.style.display = 'block';
+    document.getElementById('tambahan-list').innerHTML =
+      data.tambahan.map(v => makeItem(v, 'solid')).join('');
+  } else {
+    tSection.style.display = 'none';
+  }
+
+  // Jalan Keajaiban
+  const jkSection = document.getElementById('jk-section');
+  if (data.jalanKeajaiban.length > 0) {
+    jkSection.style.display = 'block';
+    document.getElementById('jk-list').innerHTML =
+      data.jalanKeajaiban.map(v => makeItem(v, 'keajaiban')).join('');
+  } else {
+    jkSection.style.display = 'none';
+  }
+
+  document.getElementById('form-section').style.display = 'none';
+  document.getElementById('result-section').style.display = 'block';
+}
+
+function doReset() {
+  document.getElementById('inp-day').value = '';
+  document.getElementById('inp-month').value = '';
+  document.getElementById('inp-year').value = '';
+  nightMode = false;
+  document.getElementById('night-toggle').classList.remove('active');
+  document.getElementById('night-cb').classList.remove('checked');
+  document.getElementById('night-cb').textContent = '';
+  document.getElementById('form-section').style.display = 'block';
+  document.getElementById('result-section').style.display = 'none';
+}
+</script>
+</body>
+</html>
