@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kalkulator Karakter Diri</title>
+<style>
+body{font-family:Segoe UI,Arial,sans-serif;background:#f4f6fa;margin:0}
+.wrap{max-width:500px;margin:auto;background:#fff;min-height:100vh}
+.header{background:#1B2A4A;color:#fff;padding:28px 20px;text-align:center;border-radius:0 0 20px 20px}
+.gold{color:#C9A84C;font-size:11px;letter-spacing:4px;font-weight:700}
+.card{padding:20px}
+.box{border:1px solid #e5e5e5;border-radius:14px;padding:20px}
+.row{display:flex;gap:10px}
+input{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;text-align:center}
+.btn{width:100%;padding:14px;background:#1B2A4A;color:#fff;border:none;border-radius:12px;margin-top:15px;cursor:pointer}
+.item{border:1px solid #e8e8e8;padding:12px;border-radius:12px;margin:8px 0}
+.badge{display:inline-flex;width:34px;height:34px;border-radius:50%;background:#1B2A4A;color:#fff;align-items:center;justify-content:center;font-weight:bold;margin-right:10px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="header">
+<div class="gold">METALIFE</div>
+<h2>Kalkulator Karakter Diri</h2>
+</div>
+
+<div id="form" class="card">
+<div class="box">
+<h3>Masukkan Tarikh Lahir</h3>
+<div class="row">
+<input id="day" placeholder="DD" type="number">
+<input id="month" placeholder="MM" type="number">
+<input id="year" placeholder="YYYY" type="number">
+</div>
+<label style="display:block;margin-top:15px">
+<input type="checkbox" id="night"> Lahir antara 12 tengah malam hingga Subuh
+</label>
+<button class="btn" onclick="analyse()">Analisa Karakter Saya</button>
+</div>
+</div>
+
+<div id="result" class="card hidden">
+<div id="adjust"></div>
+<h3>Kekuatan Diri</h3>
+<div id="kekuatan"></div>
+
+<h3>Kekuatan Tambahan</h3>
+<div id="tambahan"></div>
+
+<h3>Jalan Keajaiban</h3>
+<div id="keajaiban"></div>
+
+<button class="btn" onclick="location.reload()">Kira Semula</button>
+</div>
+</div>
+
+<script>
+const CHARS={
+1:{name:"Fikiran & Keazaman",sub:"Pemimpin Visioner"},
+2:{name:"Perihatin & Komunikasi",sub:"Penghubung Jiwa"},
+3:{name:"Gerak & Spiritual",sub:"Penggerak Strategi"},
+4:{name:"Ilmu & Perancangan",sub:"Perancang Bijaksana"},
+5:{name:"Keyakinan & Ketegasan",sub:"Pemimpin Berkarisma"},
+6:{name:"Rezeki & Keluarga",sub:"Penjana Kekayaan"},
+7:{name:"Sosial & Networking",sub:"Penghubung Masyarakat"},
+8:{name:"Tanggungjawab & Komitmen",sub:"Pekerja Keras"},
+9:{name:"Imej & Kejayaan",sub:"Insan Harmoni"}
+};
+
+function reduce(n){
+ n=Math.abs(Math.floor(n));
+ if(n===0) return 9;
+ while(n>9){n=String(n).split('').reduce((a,b)=>a+Number(b),0);}
+ return n;
+}
+
+function adjustDate(day,month,year){
+ const d=new Date(year,month-1,day);
+ d.setDate(d.getDate()-1);
+ return {day:d.getDate(),month:d.getMonth()+1,year:d.getFullYear()};
+}
+
+function calc(day,month,year,isNight){
+ if(isNight){
+   let a=adjustDate(day,month,year);
+   day=a.day; month=a.month; year=a.year;
+ }
+ const y1=Math.floor(year/100), y2=year%100;
+ const A=reduce(day),B=reduce(month),C=reduce(y1),D=reduce(y2);
+ const E=reduce(A+B),F=reduce(C+D);
+ const G=reduce(E+F),H=reduce(B+C),I=reduce(G+H);
+ const oi=reduce(A+E), oii=reduce(B+E), oiii=reduce(C+F), oiv=reduce(D+F);
+ const ov=reduce(oi+oii+G), ovi=reduce(oiii+oiv+G);
+
+ const order=[G,H,E,A,F,I];
+ let kekuatan=[],seen=new Set();
+ for(let v of order){ if(!seen.has(v)){kekuatan.push(v);seen.add(v);} if(kekuatan.length===4) break; }
+
+ const allInner=new Set([G,H,E,A,F,I]);
+ const outer=[oi,oii,oiii,oiv,ov,ovi];
+ let freq={}; outer.forEach(v=>freq[v]=(freq[v]||0)+1);
+ let tambahan=[];
+ Object.entries(freq).forEach(([k,c])=>{
+   if(c>=2 && !seen.has(Number(k))) tambahan.push(Number(k));
+ });
+
+ let jalan=[];
+ for(let i=1;i<=9;i++) if(!allInner.has(i)) jalan.push(i);
+
+ return {kekuatan,tambahan,jalan,day,month,year};
+}
+
+function card(num){
+ const c=CHARS[num];
+ return `<div class="item"><span class="badge">${num}</span><strong>${c.name}</strong><br><small>${c.sub}</small></div>`;
+}
+
+function analyse(){
+ const d=+day.value,m=+month.value,y=+year.value,n=night.checked;
+ if(!d||!m||!y){alert("Lengkapkan tarikh lahir");return;}
+ const r=calc(d,m,y,n);
+
+ document.getElementById('form').classList.add('hidden');
+ document.getElementById('result').classList.remove('hidden');
+
+ if(n){
+ document.getElementById('adjust').innerHTML=`<p><b>Tarikh dikira:</b> ${r.day}/${r.month}/${r.year} (tolak 1 hari)</p>`;
+ }
+
+ document.getElementById('kekuatan').innerHTML=r.kekuatan.map(card).join('');
+ document.getElementById('tambahan').innerHTML=r.tambahan.map(card).join('') || '<p>Tiada</p>';
+ document.getElementById('keajaiban').innerHTML=r.jalan.map(card).join('');
+}
+</script>
+</body>
+</html>
